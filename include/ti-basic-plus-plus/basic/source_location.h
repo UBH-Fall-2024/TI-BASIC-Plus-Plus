@@ -45,5 +45,7 @@ source_range_t range_at_current(struct input_file_iterator* file);
 // Concatenate two source ranges.
 source_range_t range_cat(source_range_t* begin, source_range_t* end);
 
+void print_range(source_range_t* range, size_t indent_num, FILE* stream);
+
 #endif  // SOURCE_LOCATION_H
 

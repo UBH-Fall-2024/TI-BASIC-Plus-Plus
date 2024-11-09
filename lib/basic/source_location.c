@@ -1,5 +1,7 @@
 #include <ti-basic-plus-plus/basic/source_location.h>
 
+#include <ti-basic-plus-plus/basic/input_file.h>
+
 bool range_validate(const source_range_t* range) {
   assert(range != NULL);
 
@@ -60,5 +62,14 @@ source_range_t range_cat(source_range_t* begin, source_range_t* end) {
   result.end = end->end;
 
   return result;
+}
+
+void print_range(source_range_t* range, size_t indent_num, FILE* stream) {
+  assert(range != NULL);
+  assert(stream != NULL);
+
+  (void)fprintf(stream, "%*sLocation: %s:%zu:%zu-%zu:%zu\n", (int)indent_num,
+                "\t", range->file->path, range->begin.line, range->begin.column,
+                range->end.line, range->end.column);
 }
 
