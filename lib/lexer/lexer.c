@@ -2,8 +2,8 @@
 
 #include <ctype.h>
 
-token_t* tokenize_line_comment(input_file_iterator_t* it);
-token_t* tokenize_block_comment(input_file_iterator_t* it, diagnostics_t* d);
+void tokenize_line_comment(input_file_iterator_t* it);
+void tokenize_block_comment(input_file_iterator_t* it, diagnostics_t* d);
 token_t* tokenize_numeric_literal(input_file_iterator_t* it, diagnostics_t* d);
 token_t* tokenize_string_literal(input_file_iterator_t* it, diagnostics_t* d);
 token_t* tokenize_identifier(input_file_iterator_t* it, diagnostics_t* d);
@@ -64,11 +64,13 @@ token_t* next_token(input_file_iterator_t* it, diagnostics_t* d) {
     }
 
     if (c == '/' && next_c == '/') {
-      return tokenize_line_comment(it);
+      tokenize_line_comment(it);
+      continue;
     }
 
     if (c == '/' && next_c == '*') {
-      return tokenize_block_comment(it, d);
+      tokenize_block_comment(it, d);
+      continue;
     }
 
     if (isdigit(c) || (c == '.' && isdigit(next_c))) {
