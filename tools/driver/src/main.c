@@ -7,8 +7,12 @@
 #include <stb_ds.h>
 #include <stdio.h>
 
+static diagnostics_t d;
+
+static void compile(void);
+
 int main(int argc, const char** argv) {
-  diagnostics_t d = diagnostics_create();
+  d = diagnostics_create();
 
   do {
     parse_arguments(argc, argv, &d);
@@ -16,15 +20,27 @@ int main(int argc, const char** argv) {
       break;
     }
 
-    // TODO: Validate arguments.
-
-    /* compile(&d); */
-    if (should_exit(&d)) {
-      break;
+    if (driver_config.build) {
+      compile();
+      if (should_exit(&d)) {
+        break;
+      }
     }
 
-    // TODO: Serialization, sending, etc.
+    if (driver_config.send) {
+      // TODO: Send to calculator.
+    }
   } while (false);
 
   return get_exit_status(&d);
+}
+
+static void compile(void) {
+  // Lexing
+
+  // Parsing
+
+  // Semantic analysis
+
+  // (Optional) Encoding
 }
