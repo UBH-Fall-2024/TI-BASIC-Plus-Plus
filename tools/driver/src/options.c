@@ -158,10 +158,6 @@ static void process_input_options(input_option_t* input_options,
     }
   }
 
-  if (driver_config.output_path == NULL && !driver_config.send) {
-    diag_report(d, ERROR, "no output file given");
-    return;
-  }
 
   if (driver_config.build) {
     // Input file.
@@ -174,6 +170,11 @@ static void process_input_options(input_option_t* input_options,
     }
 
     // Output file.
+
+    if (driver_config.output_path == NULL) {
+      diag_report(d, ERROR, "no output file given");
+      return;
+    }
 
     extension =
         get_file_extension(driver_config.output_path, &extension_ptr);
