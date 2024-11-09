@@ -2,6 +2,7 @@
 #include <driver/options.h>
 
 #include <assert.h>
+#include <ctype.h>
 #include <stb_ds.h>
 #include <stdio.h>
 #include <string.h>
@@ -73,9 +74,12 @@ void parse_arguments(int argc, const char** argv, diagnostics_t* d) {
   size_t num_input_paths = arrlenu(input_paths);
   if (num_input_paths < 1) {
     diag_report(d, ERROR, "no input file given");
+    goto CLEANUP;
   } else if (num_input_paths > 1) {
     diag_report(d, ERROR, "multiple input files given");
+    goto CLEANUP;
   }
+  driver_config.input_path = input_paths[0];
 
   process_input_options(input_options, d);
 
@@ -103,6 +107,49 @@ static void parse_driver_task(const char* task, diagnostics_t* d) {
     diag_report(d, ERROR, "invalid driver task '%s'", task);
     print_usage(stderr);
   }
+}
+
+static void validate_8xp_filename(const char* filename,
+                                  const char* extension,
+                                  diagnostics_t* d) {
+  assert(filename != NULL);
+  assert(extension != NULL);
+
+  const char* file = strrchr(filename, '/');
+  if (file == NULL) {
+    file = filename;
+  } else {
+    file++;
+  }
+  assert(file != NULL);
+
+  size_t program_name_length = extension - file;
+  if (program_name_length > 8) {
+    diag_report_file(d, ERROR, file,
+                     "output filename is longer than 8 characters");
+    return;
+  }
+  if (!program_name_length) {
+    diag_report_file(d, ERROR, file, "output filename cannot be empty");
+    return;
+  }
+
+  for (size_t i = 0; i < program_name_length; ++i) {
+    if (isalpha(file[i])) {
+      if (islower(file[i])) {
+        diag_report_file(d, ERROR, file, "output filename must be uppercase");
+        return;
+      }
+      continue;
+    }
+
+    if (!isdigit(file[i])) {
+      diag_report_file(d, ERROR, file, "output filename must be alphanumeric");
+      return;
+    }
+  }
+
+  (void)strncpy(driver_config.output_program_name, file, program_name_length);
 }
 
 static void process_input_options(input_option_t* input_options,
@@ -146,6 +193,36 @@ static void process_input_options(input_option_t* input_options,
         assert(false);
         return;
     }
+  }
+
+  if (driver_config.output_path == NULL && !driver_config.send) {
+    diag_report(d, ERROR, "no output file given");
+    return;
+  }
+
+  if (driver_config.build) {
+    const char* extension = strrchr(driver_config.output_path, '.');
+    if (extension == NULL) {
+      diag_report_file(
+          d, WARNING, driver_config.output_path,
+          "output file does not have an extension: defaulting to ASCII output");
+      driver_config.output_type = OUTPUT_ASCII;
+
+    } else if (strcmp(extension, ".8xp") == 0 ||
+               strcmp(extension, ".8Xp") == 0) {
+      validate_8xp_filename(driver_config.output_path, extension, d);
+      driver_config.output_type = OUTPUT_8XP;
+
+    } else if (strcmp(extension, ".tibasic") != 0 &&
+               strcmp(extension, ".TIBASIC") != 0) {
+      diag_report_file(
+          d, WARNING, driver_config.output_path,
+          "output file does not have a .tibasic or a .8xp extension: "
+          "defaulting to ASCII output");
+      driver_config.output_type = OUTPUT_ASCII;
+    }
+  } else { // !build && send
+    driver_config.output_path = driver_config.input_path;
   }
 }
 

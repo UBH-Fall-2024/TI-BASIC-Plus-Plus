@@ -22,15 +22,16 @@ typedef struct {
   const char* program_name;
 
   const char* input_path;
+  char output_program_name[8];
   const char* output_path;
-
-  bool build;
-  bool send;
 
   enum {
     OUTPUT_ASCII,
     OUTPUT_8XP,
   } output_type;
+
+  bool build;
+  bool send;
 
   bool verbose;
   bool print_ast;
