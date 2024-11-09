@@ -24,7 +24,7 @@ typedef struct token {
   token_kind_t kind;
 
   union {
-    stringref_t string;
+    char* string; // stb_ds allocated
     double number;
     /* keyword_t keyword; */
     /* punctuator_t punctuator; */

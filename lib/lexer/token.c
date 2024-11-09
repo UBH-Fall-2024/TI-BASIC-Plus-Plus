@@ -1,6 +1,7 @@
 #include <ti-basic-plus-plus/lexer/token.h>
 
 #include <assert.h>
+#include <stb_ds.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -21,6 +22,14 @@ token_t* token_create(token_kind_t kind, source_range_t location) {
   return token;
 }
 
+static void token_destroy(token_t* token) {
+  if (token->kind == TOKEN_STRING_LITERAL || token->kind == TOKEN_IDENTIFIER) {
+    arrfree(token->data.string);
+  }
+
+  free(token);
+}
+
 void token_list_destroy(token_t* head) {
   assert(head != NULL);
 
@@ -28,7 +37,8 @@ void token_list_destroy(token_t* head) {
   while (current != NULL) {
     head = current;
     current = current->next;
-    free(head);
+
+    token_destroy(head);
   }
 }
 
@@ -109,8 +119,8 @@ static void print_token_identifier(token_t* token, FILE* stream) {
   fputs("Token: Identifier\n", stream);
   print_range(&token->location, 1, stream);
 
-  fprintf(stream, "\tText: '%*.s'\n", (int)token->data.string.length,
-          token->data.string.data);
+  fprintf(stream, "\tText: '%.*s'\n", (int)arrlen(token->data.string),
+          token->data.string);
 }
 
 static void print_token_keyword(token_t* token, FILE* stream) {
@@ -154,8 +164,8 @@ static void print_token_string_literal(token_t* token, FILE* stream) {
   fputs("Token: String Literal\n", stream);
   print_range(&token->location, 1, stream);
 
-  fprintf(stream, "\tText: '%*.s'\n", (int)token->data.string.length,
-          token->data.string.data);
+  fprintf(stream, "\tText: '%.*s'\n", (int)arrlen(token->data.string),
+          token->data.string);
 }
 
 static void print_token_newline(token_t* token, FILE* stream) {
