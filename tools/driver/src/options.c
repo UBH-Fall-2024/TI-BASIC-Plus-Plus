@@ -1,6 +1,8 @@
 #define DRIVER_OPTIONS_IMPL
 #include <driver/options.h>
 
+#include <ti-basic-plus-plus/basic/file_type.h>
+
 #include <assert.h>
 #include <ctype.h>
 #include <stb_ds.h>
@@ -80,6 +82,10 @@ void parse_arguments(int argc, const char** argv, diagnostics_t* d) {
     goto CLEANUP;
   }
   driver_config.input_path = input_paths[0];
+  validate_file_exists(driver_config.input_path, d);
+  if (should_exit(d)) {
+    return;
+  }
 
   process_input_options(input_options, d);
 
@@ -107,49 +113,6 @@ static void parse_driver_task(const char* task, diagnostics_t* d) {
     diag_report(d, ERROR, "invalid driver task '%s'", task);
     print_usage(stderr);
   }
-}
-
-static void validate_8xp_filename(const char* filename,
-                                  const char* extension,
-                                  diagnostics_t* d) {
-  assert(filename != NULL);
-  assert(extension != NULL);
-
-  const char* file = strrchr(filename, '/');
-  if (file == NULL) {
-    file = filename;
-  } else {
-    file++;
-  }
-  assert(file != NULL);
-
-  size_t program_name_length = extension - file;
-  if (program_name_length > 8) {
-    diag_report_file(d, ERROR, file,
-                     "output filename is longer than 8 characters");
-    return;
-  }
-  if (!program_name_length) {
-    diag_report_file(d, ERROR, file, "output filename cannot be empty");
-    return;
-  }
-
-  for (size_t i = 0; i < program_name_length; ++i) {
-    if (isalpha(file[i])) {
-      if (islower(file[i])) {
-        diag_report_file(d, ERROR, file, "output filename must be uppercase");
-        return;
-      }
-      continue;
-    }
-
-    if (!isdigit(file[i])) {
-      diag_report_file(d, ERROR, file, "output filename must be alphanumeric");
-      return;
-    }
-  }
-
-  (void)strncpy(driver_config.output_program_name, file, program_name_length);
 }
 
 static void process_input_options(input_option_t* input_options,
@@ -201,27 +164,46 @@ static void process_input_options(input_option_t* input_options,
   }
 
   if (driver_config.build) {
-    const char* extension = strrchr(driver_config.output_path, '.');
-    if (extension == NULL) {
-      diag_report_file(
-          d, WARNING, driver_config.output_path,
-          "output file does not have an extension: defaulting to ASCII output");
-      driver_config.output_type = OUTPUT_ASCII;
+    // Input file.
 
-    } else if (strcmp(extension, ".8xp") == 0 ||
-               strcmp(extension, ".8Xp") == 0) {
-      validate_8xp_filename(driver_config.output_path, extension, d);
-      driver_config.output_type = OUTPUT_8XP;
-
-    } else if (strcmp(extension, ".tibasic") != 0 &&
-               strcmp(extension, ".TIBASIC") != 0) {
-      diag_report_file(
-          d, WARNING, driver_config.output_path,
-          "output file does not have a .tibasic or a .8xp extension: "
-          "defaulting to ASCII output");
-      driver_config.output_type = OUTPUT_ASCII;
+    const char* extension_ptr;
+    file_extension_t extension = get_file_extension(driver_config.input_path, &extension_ptr);
+    if (extension != FILE_EXT_TIBASICPP) {
+      diag_report_file(d, ERROR, driver_config.input_path, "input file must be a TI-BASIC++ program");
+      return;
     }
-  } else { // !build && send
+
+    // Output file.
+
+    extension =
+        get_file_extension(driver_config.output_path, &extension_ptr);
+    switch (extension) {
+      case FILE_EXT_NONE:
+        diag_report_file(d, WARNING, driver_config.output_path,
+                         "output file does not have an extension: defaulting "
+                         "to ASCII output");
+        driver_config.output_type = OUTPUT_ASCII;
+        break;
+      case FILE_EXT_8XP:
+        validate_8xp_filename(driver_config.output_path, extension_ptr,
+                              driver_config.output_program_name, d);
+        driver_config.output_type = OUTPUT_8XP;
+        break;
+      case FILE_EXT_TIBASICPP:
+        diag_report_file(d, ERROR, driver_config.output_path,
+                         "output file is a TI-BASIC++ file");
+        break;
+      case FILE_EXT_UNKNOWN:
+        diag_report_file(
+            d, WARNING, driver_config.output_path,
+            "output file does not have a .tibasic or a .8xp extension: "
+            "defaulting to ASCII output");
+        // fallthrough
+      case FILE_EXT_TIBASIC:
+        driver_config.output_type = OUTPUT_ASCII;
+        break;
+    }
+  } else {  // !build && send
     driver_config.output_path = driver_config.input_path;
   }
 }
