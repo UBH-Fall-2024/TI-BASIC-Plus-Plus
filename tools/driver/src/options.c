@@ -15,10 +15,12 @@ driver_config_t driver_config;
 
 // clang-format off
 const option_t driver_options[] = {
-    {OPTION_WARNINGS_AS_ERRORS,  false,     NULL, {OPT_NAME("Werror"),           NULL}, "Treat warnings as errors"},
-    {OPTION_OUTPUT,              true,  "<file>", {OPT_NAME("o"),                NULL}, "Write output to file"},
-    {OPTION_VERBOSE,             false,     NULL, {OPT_NAME("v"),                NULL}, "Enable verbose output"},
-    {OPTION_SUPPRESS_WARNINGS,   false,     NULL, {OPT_NAME("w"),                NULL}, "Suppress warnings"},
+    {OPTION_WARNINGS_AS_ERRORS,  false,     NULL, {OPT_NAME("Werror"),      NULL}, "Treat warnings as errors"},
+    {OPTION_OUTPUT,              true,  "<file>", {OPT_NAME("o"),           NULL}, "Write output to file"},
+    {OPTION_VERBOSE,             false,     NULL, {OPT_NAME("v"),           NULL}, "Enable verbose output"},
+    {OPTION_SUPPRESS_WARNINGS,   false,     NULL, {OPT_NAME("w"),           NULL}, "Suppress warnings"},
+    {OPTION_DUMP_TOKENS,         false,     NULL, {OPT_NAME("dump-tokens"), NULL}, "Emit parsed tokens"},
+    {OPTION_DUMP_AST,            false,     NULL, {OPT_NAME("dump-ast"),    NULL}, "Emit generated AST"},
 };
 // clang-format on
 
@@ -151,6 +153,12 @@ static void process_input_options(input_option_t* input_options,
         break;
       case OPTION_SUPPRESS_WARNINGS:
         d->suppress_warnings = true;
+        break;
+      case OPTION_DUMP_TOKENS:
+        driver_config.dump_tokens = true;
+        break;
+      case OPTION_DUMP_AST:
+        driver_config.dump_ast = true;
         break;
       default:
         assert(false);

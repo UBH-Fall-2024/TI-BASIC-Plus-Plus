@@ -12,6 +12,8 @@ enum {
   OPTION_OUTPUT,             // -o<file>
   OPTION_VERBOSE,            // -v
   OPTION_SUPPRESS_WARNINGS,  // -w
+  OPTION_DUMP_TOKENS,        // --dump-tokens
+  OPTION_DUMP_AST,           // --dump-ast
   _OPTION_COUNT,
 };
 
@@ -34,7 +36,8 @@ typedef struct {
   bool send;
 
   bool verbose;
-  bool print_ast;
+  bool dump_tokens;
+  bool dump_ast;
 } driver_config_t;
 
 #ifndef DRIVER_OPTIONS_IMPL
