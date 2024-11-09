@@ -39,32 +39,11 @@ endif()
 target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -Wall -Wextra -Werror -pedantic)
 
 # Include directories
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE include)
+target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC include)
 
 # Sources
 file(GLOB_RECURSE LIB_SOURCES lib/*.c)
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${LIB_SOURCES})
-
-# Flex and Bison generated lexer and parser
-find_package(BISON REQUIRED)
-find_package(FLEX REQUIRED)
-
-# Compile the lexer
-FLEX_TARGET(LEXER lib/parser/lexer.l
-                  ${CMAKE_CURRENT_BINARY_DIR}/parser/lexer.c
-                  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/parser/lexer.h
-                  COMPILE_FLAGS ${ADDITIONAL_FLEX_FLAGS})
-
-# Compile the parser
-BISON_TARGET(PARSER lib/parser/parser.y
-                    ${CMAKE_CURRENT_BINARY_DIR}/parser/parser.c
-                    COMPILE_FLAGS "-d -v")
-
-ADD_FLEX_BISON_DEPENDENCY(LEXER PARSER)
-
-target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${BISON_PARSER_OUTPUTS} ${FLEX_LEXER_OUTPUTS})
 
 # Add stb library
 add_subdirectory(thirdparty/stb)
