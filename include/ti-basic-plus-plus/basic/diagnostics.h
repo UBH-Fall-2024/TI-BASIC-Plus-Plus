@@ -29,6 +29,11 @@ void diag_report_file(diagnostics_t*,
                       const char* file,
                       const char* fmt,
                       ...);
+void diag_report_source(diagnostics_t*,
+                        severity_t,
+                        source_range_t*,
+                        const char* fmt,
+                        ...);
 
 static inline bool has_errors(const diagnostics_t* d) {
   assert(d != NULL);

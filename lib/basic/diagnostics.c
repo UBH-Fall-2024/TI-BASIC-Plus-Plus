@@ -90,6 +90,31 @@ void diag_report_file(diagnostics_t* d,
   }
 }
 
+void diag_report_source(diagnostics_t* d,
+                        severity_t orig_severity,
+                        source_range_t* range,
+                        const char* fmt,
+                        ...) {
+  assert(d != NULL);
+  assert(range_validate(range));
+
+  severity_internal_t severity = get_severity(d, orig_severity);
+  if (severity == SEVERITY_SUPPRESS) {
+    return;
+  }
+
+  const char* file = range->file->path;
+
+  va_list args;
+  va_start(args, fmt);
+  emit_diagnostic_v(stderr, severity, file, range, fmt, args);
+  va_end(args);
+
+  if (severity >= SEVERITY_ERROR) {
+    d->has_errors = true;
+  }
+}
+
 static severity_internal_t get_severity(const diagnostics_t* d, severity_t severity) {
   assert(d != NULL);
 
@@ -181,8 +206,92 @@ static void emit_message(FILE* stream, const char* fmt, va_list args) {
   (void)fprintf(stream, "\033[0m\n");
 }
 
+static size_t calculate_code_gutter_size(size_t line_number,
+                                         size_t* line_digits);
+static void emit_code_gutter_with_line_number(FILE* stream,
+                                              size_t line,
+                                              size_t line_digits,
+                                              size_t gutter_size);
+static void emit_code_gutter_empty(FILE* stream, size_t gutter_size);
+
 static void emit_code(FILE* stream, source_range_t* range) {
   assert(stream != NULL);
   assert(range != NULL);
+
+  if (range->begin.line != range->end.line) {
+    // I'm not sure how to emit this... let's just not do it :D
+    return;
+  }
+
+  char* line = if_get_line(range->file, range->begin.line);
+  if (line == NULL) {
+    assert(false);
+    return;
+  }
+  const size_t line_length = strlen(line);
+  if (!line_length) {
+    assert(false);
+    free(line);
+    return;
+  }
+
+  size_t line_digits;
+  size_t gutter_size =
+      calculate_code_gutter_size(range->begin.line, &line_digits);
+
+  // Print the code.
+
+  emit_code_gutter_with_line_number(stream, range->begin.line, line_digits,
+                                    gutter_size);
+  (void)fprintf(stream, "%s\n", line);
+
+  // Point to the problem.
+
+  emit_code_gutter_empty(stream, gutter_size);
+
+  (void)fputs("\033[0;1;32m", stream);
+  if (range->begin.column > 1) {
+    (void)fprintf(stream, "%*s", (int)(range->begin.column - 1), " ");
+  }
+  (void)fputc('^', stream);
+
+  size_t problem_length = range->end.column - range->begin.column;
+  for (size_t i = 0; i < problem_length; ++i) {
+    (void)fputc('~', stream);
+  }
+  (void)fputs("\033[0m\n", stream);
+
+  free(line);
+}
+
+static size_t calculate_code_gutter_size(size_t line_number,
+                                         size_t* line_digits) {
+  *line_digits = 1;
+  while (line_number > 9) {
+    line_number /= 10;
+    (*line_digits)++;
+  }
+
+  if (*line_digits < 5) {
+    return 6;
+  }
+
+  return *line_digits + 2;
+}
+
+static void emit_code_gutter_with_line_number(FILE* stream,
+                                              size_t line,
+                                              size_t line_digits,
+                                              size_t gutter_size) {
+  assert(line_digits < gutter_size);
+
+  int num_leading_spaces = (int)(gutter_size - line_digits - 1);
+
+  (void)fprintf(stream, "%*s%zu ", num_leading_spaces, " ", line);
+  (void)fputs("| ", stream);
+}
+
+static void emit_code_gutter_empty(FILE* stream, size_t gutter_size) {
+  (void)fprintf(stream, "%*s| ", (int)gutter_size, " ");
 }
 
