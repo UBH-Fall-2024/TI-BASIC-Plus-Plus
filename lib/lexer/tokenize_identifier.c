@@ -12,7 +12,7 @@ token_t* tokenize_identifier(input_file_iterator_t* it, diagnostics_t* d) {
 
   char* text = NULL;
   int c = if_current(it);
-  while (isalpha(c) || c == '_') {
+  while (isalnum(c) || c == '_') {
     arrput(text, c);
     end_position = if_get_position(it);
     c = if_next(it);
