@@ -19,8 +19,18 @@ token_t* tokenize_identifier(input_file_iterator_t* it, diagnostics_t* d) {
   source_range_t range =
       range_create(it->file, start_position, if_get_position(it));
 
-  token_t* token = token_create(TOKEN_IDENTIFIER, range);
-  token->data.string = text;
+  token_t* token = NULL;
+
+  keyword_kind_t keyword_kind = keyword_match(text, arrlen(text));
+  if (keyword_kind == KW_UNKNOWN) {
+    token = token_create(TOKEN_IDENTIFIER, range);
+    token->data.string = text;
+  }
+  else {
+    token = token_create(TOKEN_KEYWORD, range);
+    token->data.keyword = keyword_kind;
+    arrfree(text);
+  }
 
   return token;
 }
