@@ -251,11 +251,16 @@ static void emit_code(FILE* stream, source_range_t* range) {
   }
   (void)fputc('^', stream);
 
-  if (!multiline) {
-    size_t problem_length = range->end.column - range->begin.column;
-    for (size_t i = 0; i < problem_length; ++i) {
-      (void)fputc('~', stream);
-    }
+  size_t problem_length = 0;
+  if (multiline) {
+    assert(line_length >= range->begin.column);
+    problem_length = line_length - range->begin.column;
+  }
+  else {
+    problem_length = range->end.column - range->begin.column;
+  }
+  for (size_t i = 0; i < problem_length; ++i) {
+    (void)fputc('~', stream);
   }
 
   (void)fputs("\033[0m\n", stream);
