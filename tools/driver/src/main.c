@@ -5,6 +5,7 @@
 #include <ti-basic-plus-plus/basic/input_file.h>
 #include <ti-basic-plus-plus/lexer/lexer.h>
 #include <ti-basic-plus-plus/parser/parser.h>
+#include <ti-basic-plus-plus/sema/semantic_analyzer.h>
 
 #include <assert.h>
 #include <stb_ds.h>
@@ -71,13 +72,23 @@ static void compile(void) {
     goto CLEANUP;
   }
 
+  // Semantic analysis
+  analyze_semantics(ast_root, &d);
+  if (should_exit(&d)) {
+    goto CLEANUP;
+  }
+
   if (driver_config.dump_ast) {
     print_ast(ast_root, stdout);
   }
 
-  // Semantic analysis
-
-  // (Optional) Encoding
+  // This is temporary.
+  FILE* output_file = fopen("output.tibasic", "w");
+  if (!output_file) {
+    goto CLEANUP;
+  }
+  output_ti_basic(ast_root, output_file);
+  fclose(output_file);
 
 CLEANUP:
   if (ast_root != NULL) {

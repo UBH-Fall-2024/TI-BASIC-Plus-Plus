@@ -110,8 +110,10 @@ ast_node_t* ast_node_create_function_call(const char* name,
 void ast_node_destroy(ast_node_t* node) {
   assert(node != NULL);
 
-  for (size_t i = 0; i < arrlenu(node->children); i++) {
-    ast_node_destroy(node->children[i]);
+  if (!node->dont_free_children) {
+    for (size_t i = 0; i < arrlenu(node->children); i++) {
+      ast_node_destroy(node->children[i]);
+    }
   }
 
   arrfree(node->children);
@@ -277,6 +279,109 @@ static void print_ast_node_internal(ast_node_t* node, FILE* stream, int depth) {
 
   for (size_t i = 0; i < arrlenu(node->children); i++) {
     print_ast_node_internal(node->children[i], stream, depth + 1);
+  }
+}
+
+void output_ti_basic(ast_node_t* node, FILE* stream) {
+  assert(node != NULL);
+  assert(stream != NULL);
+
+  switch (node->kind) {
+    case AST_ROOT:
+      for (size_t i = 0; i < arrlenu(node->children); i++) {
+        output_ti_basic(node->children[i], stream);
+      }
+      break;
+    case AST_FUNCTION_DECL:
+      // if main
+      if (strncmp(node->data.function_decl.name, "main",
+                  arrlenu(node->data.function_decl.name)) == 0) {
+        output_ti_basic(node->children[0], stream);
+      }
+      break;
+    case AST_BLOCK:
+      for (size_t i = 0; i < arrlenu(node->children); i++) {
+        output_ti_basic(node->children[i], stream);
+      }
+      break;
+    case AST_VARIABLE_DECL:
+      if (arrlenu(node->children) > 0) {
+        output_ti_basic(node->children[0], stream);
+      }
+      fprintf(stream, "→");
+
+      if (node->data.variable_decl.has_variable) {
+        switch (node->data.variable_decl.variable.type) {
+          case VAR_NUMBER:
+            fprintf(stream, "%c", node->data.variable_decl.variable.id);
+            break;
+          case VAR_STRING:
+            fprintf(stream, "Str%c", node->data.variable_decl.variable.id);
+            break;
+          case VAR_MATRIX:
+            fprintf(stream, "[%c]", node->data.variable_decl.variable.id);
+            break;
+          case VAR_LIST:
+            fprintf(stream, "L%c", node->data.variable_decl.variable.id);
+            break;
+          case VAR_LIST_ELEMENT:
+            fprintf(stream, "L₀(%d)", node->data.variable_decl.variable.id);
+            break;
+          default:
+            break;
+        }
+        fprintf(stream, "\n");
+      } else {
+        fprintf(stream, " ");
+      }
+      break;
+    case AST_STRING_LITERAL:
+      fprintf(stream, "\"%.*s\"", (int)arrlen(node->data.string_literal),
+              node->data.string_literal);
+      break;
+    case AST_NUMERIC_LITERAL:
+      fprintf(stream, "%f", node->data.numeric_literal);
+      break;
+    case AST_FUNCTION_CALL:
+      if (node->data.function_call.is_builtin) {
+        print_builtin_function(
+            node->data.function_call.matched_function.builtin, stream);
+      } else {
+        // NOT implemented
+      }
+
+      for (size_t i = 0; i < arrlenu(node->children); i++) {
+        output_ti_basic(node->children[i], stream);
+      }
+      fprintf(stream, "\n");
+      break;
+    case AST_IDENTIFIER:
+      if (arrlenu(node->children) > 0) {
+        if (node->children[0]->data.variable_decl.has_variable) {
+          switch (node->children[0]->data.variable_decl.variable.type) {
+            case VAR_NUMBER:
+              fprintf(stream, "%c", node->children[0]->data.variable_decl.variable.id);
+              break;
+            case VAR_STRING:
+              fprintf(stream, "Str%c", node->children[0]->data.variable_decl.variable.id);
+              break;
+            case VAR_MATRIX:
+              fprintf(stream, "[%c]", node->children[0]->data.variable_decl.variable.id);
+              break;
+            case VAR_LIST:
+              fprintf(stream, "L%c", node->children[0]->data.variable_decl.variable.id);
+              break;
+            case VAR_LIST_ELEMENT:
+              fprintf(stream, "L₀(%d)", node->children[0]->data.variable_decl.variable.id);
+              break;
+            default:
+              break;
+          }
+        }
+      }
+      break;
+    default:
+      break;
   }
 }
 

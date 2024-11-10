@@ -12,6 +12,7 @@ typedef enum variable_type {
   VAR_STRING,
   VAR_MATRIX,
   VAR_LIST,
+  VAR_LIST_ELEMENT,
 } variable_type_t;
 
 variable_type_t keyword_to_variable_type(keyword_kind_t kind);

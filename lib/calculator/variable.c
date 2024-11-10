@@ -48,11 +48,7 @@ bool match_variable(const char* string,
   }
 
   // List
-  if (string[0] == 'L') {
-    if (length != 2) {
-      return false;
-    }
-
+  if (string[0] == 'L' && length == 2) {
     char c = string[1];
     if (c < '0' || c > '9') {
       return false;

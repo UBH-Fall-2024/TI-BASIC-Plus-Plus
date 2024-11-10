@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <ti-basic-plus-plus/basic/source_location.h>
 #include <ti-basic-plus-plus/calculator/variable.h>
+#include <ti-basic-plus-plus/calculator/builtin_functions.h>
 #include <ti-basic-plus-plus/parser/operator.h>
 
 typedef enum {
@@ -45,7 +46,11 @@ typedef struct ast_function_decl {
 
 typedef struct ast_function_call {
   const char* name;
-  // TODO: Match to builtin function.
+  union {
+    struct ast_node* decl;
+    builtin_function_t builtin;
+  } matched_function;
+  bool is_builtin;
 } ast_function_call_t;
 
 typedef struct ast_node {
@@ -56,6 +61,7 @@ typedef struct ast_node {
   bool has_error_location;
 
   struct ast_node** children;
+  bool dont_free_children;
 
   union {
     variable_t reserved_variable;
@@ -106,6 +112,8 @@ ast_node_t* ast_node_create_function_call(const char* name,
                                           source_range_t location);
 
 void print_ast(ast_node_t* root, FILE* stream);
+
+void output_ti_basic(ast_node_t* root, FILE* stream);
 
 #endif  // AST_H
 
