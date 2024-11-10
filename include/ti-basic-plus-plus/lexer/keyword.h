@@ -20,6 +20,10 @@ typedef enum keyword_kind {
   KW_RETURN,
   KW_GOTO,
 
+  KW_AND,
+  KW_OR,
+  KW_NOT,
+
   KW_RESERVE,
 } keyword_kind_t;
 

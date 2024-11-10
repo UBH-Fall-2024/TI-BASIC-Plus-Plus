@@ -8,6 +8,7 @@ static const char* keyword_strings[] = {
     [KW_STRING] = "String",   [KW_MATRIX] = "Matrix", [KW_LIST] = "List",
     [KW_IF] = "if",           [KW_ELIF] = "elif",     [KW_ELSE] = "else",
     [KW_WHILE] = "while",     [KW_RETURN] = "return", [KW_GOTO] = "goto",
+    [KW_AND] = "and",         [KW_OR] = "or",         [KW_NOT] = "not",
     [KW_RESERVE] = "reserve",
 };
 
