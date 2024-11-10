@@ -27,13 +27,15 @@ token_t* tokenize_string_literal(input_file_iterator_t* it, diagnostics_t* d) {
     c = if_next(it);
   }
 
+  source_position_t end_position = if_get_position(it);
+
   (void)if_next(it);  // quote
 
-  source_range_t range =
-      range_create(it->file, start_position, if_get_position(it));
+  source_range_t range = range_create(it->file, start_position, end_position);
 
   token_t* token = token_create(TOKEN_STRING_LITERAL, range);
   token->data.string = text;
 
   return token;
 }
+

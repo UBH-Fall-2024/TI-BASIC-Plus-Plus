@@ -92,13 +92,14 @@ token_t* tokenize_punctuator(input_file_iterator_t* it, diagnostics_t* d) {
     return NULL;
   }
 
-  (void)if_next(it);
   if (kind >= PUNCT_ASGN_ADD) {
     (void)if_next(it);
   }
 
   source_range_t range =
       range_create(it->file, start_position, if_get_position(it));
+
+  (void)if_next(it);
 
   token_t* token = token_create(TOKEN_PUNCTUATOR, range);
   token->data.punctuator = kind;

@@ -28,7 +28,7 @@ typedef struct source_range {
   source_position_t end;
 } source_range_t;
 
-bool range_validate(const source_range_t* range);
+bool range_is_valid(const source_range_t* range);
 
 source_range_t range_create(struct input_file* file,
                             source_position_t begin,

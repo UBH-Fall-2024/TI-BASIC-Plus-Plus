@@ -96,7 +96,7 @@ void diag_report_source(diagnostics_t* d,
                         const char* fmt,
                         ...) {
   assert(d != NULL);
-  assert(range_validate(range));
+  assert(range_is_valid(range));
 
   severity_internal_t severity = get_severity(d, orig_severity);
   if (severity == SEVERITY_SUPPRESS) {

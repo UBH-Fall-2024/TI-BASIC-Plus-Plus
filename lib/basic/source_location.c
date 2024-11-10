@@ -2,7 +2,7 @@
 
 #include <ti-basic-plus-plus/basic/input_file.h>
 
-bool range_validate(const source_range_t* range) {
+bool range_is_valid(const source_range_t* range) {
   assert(range != NULL);
 
   if (range->file == NULL) {
@@ -50,8 +50,8 @@ source_range_t range_at_current(input_file_iterator_t* it) {
 }
 
 source_range_t range_cat(source_range_t* begin, source_range_t* end) {
-  assert(range_validate(begin));
-  assert(range_validate(end));
+  assert(range_is_valid(begin));
+  assert(range_is_valid(end));
 
   assert(begin->file == end->file);
   assert(begin->end.line < end->begin.line ||
