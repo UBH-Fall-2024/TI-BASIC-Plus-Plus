@@ -218,10 +218,7 @@ static void emit_code(FILE* stream, source_range_t* range) {
   assert(stream != NULL);
   assert(range != NULL);
 
-  if (range->begin.line != range->end.line) {
-    // I'm not sure how to emit this... let's just not do it :D
-    return;
-  }
+  bool multiline = (range->begin.line != range->end.line);
 
   char* line = if_get_line(range->file, range->begin.line);
   if (line == NULL) {
@@ -230,7 +227,6 @@ static void emit_code(FILE* stream, source_range_t* range) {
   }
   const size_t line_length = strlen(line);
   if (!line_length) {
-    assert(false);
     free(line);
     return;
   }
@@ -255,10 +251,13 @@ static void emit_code(FILE* stream, source_range_t* range) {
   }
   (void)fputc('^', stream);
 
-  size_t problem_length = range->end.column - range->begin.column;
-  for (size_t i = 0; i < problem_length; ++i) {
-    (void)fputc('~', stream);
+  if (!multiline) {
+    size_t problem_length = range->end.column - range->begin.column;
+    for (size_t i = 0; i < problem_length; ++i) {
+      (void)fputc('~', stream);
+    }
   }
+
   (void)fputs("\033[0m\n", stream);
 
   free(line);
