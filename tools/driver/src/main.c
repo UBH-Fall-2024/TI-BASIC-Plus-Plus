@@ -4,6 +4,7 @@
 #include <ti-basic-plus-plus/basic/diagnostics.h>
 #include <ti-basic-plus-plus/basic/input_file.h>
 #include <ti-basic-plus-plus/lexer/lexer.h>
+#include <ti-basic-plus-plus/parser/parser.h>
 
 #include <assert.h>
 #include <stb_ds.h>
@@ -46,7 +47,7 @@ static void compile(void) {
   }
 
   token_t* head_token = NULL;
-  /* ast_node_t* ast_root = NULL; */
+  ast_node_t* ast_root = NULL;
 
   // Lexical analysis
 
@@ -63,6 +64,15 @@ static void compile(void) {
   }
 
   // Parsing
+
+  ast_root = parse_tokens(head_token, &d);
+  if (ast_root == NULL || should_exit(&d)) {
+    goto CLEANUP;
+  }
+
+  if (driver_config.dump_ast) {
+    print_ast(ast_root, stdout);
+  }
 
   // Semantic analysis
 
