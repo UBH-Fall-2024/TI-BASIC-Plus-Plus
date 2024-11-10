@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <stdarg.h>
 
-ast_node_t* parse_global_decl(token_t** head_token, diagnostics_t* d);
+#include "parser_internal.h"
 
 ast_node_t* parse_tokens(token_t* head_token, diagnostics_t* d) {
   assert(head_token != NULL);
@@ -11,7 +11,8 @@ ast_node_t* parse_tokens(token_t* head_token, diagnostics_t* d) {
 
   ast_node_t* root = ast_node_create(AST_ROOT);
 
-  while (head_token != NULL && head_token->kind != TOKEN_EOF && !should_exit(d)) {
+  while (head_token != NULL && head_token->kind != TOKEN_EOF &&
+         !should_exit(d)) {
     ast_node_t* decl = parse_global_decl(&head_token, d);
     if (decl == NULL) {
       return root;
@@ -105,15 +106,34 @@ void unexpected_token(token_t* t, token_kind_t kind, diagnostics_t* d) {
   assert(d != NULL);
 
   if (t->kind != kind || kind == TOKEN_UNKNOWN) {
-    diag_report_source(d, ERROR, &t->location, "unexpected %s", token_kind_to_string(t->kind));
-  }
-  else if (t->kind == TOKEN_PUNCTUATOR) {
-    diag_report_source(d, ERROR, &t->location, "unexpected punctuator '%s'", punct_to_string(t->data.punctuator));
-  }
-  else if (t->kind == TOKEN_KEYWORD) {
-    diag_report_source(d, ERROR, &t->location, "unexpected keyword '%s'", keyword_to_string(t->data.keyword));
-  }
-  else {
+    diag_report_source(d, ERROR, &t->location, "unexpected %s",
+                       token_kind_to_string(t->kind));
+  } else if (t->kind == TOKEN_PUNCTUATOR) {
+    diag_report_source(d, ERROR, &t->location, "unexpected punctuator '%s'",
+                       punct_to_string(t->data.punctuator));
+  } else if (t->kind == TOKEN_KEYWORD) {
+    diag_report_source(d, ERROR, &t->location, "unexpected keyword '%s'",
+                       keyword_to_string(t->data.keyword));
+  } else {
     diag_report_source(d, ERROR, &t->location, "unexpected token");
   }
 }
+
+variable_type_t parse_variable_type(token_t** t, bool void_allowed, diagnostics_t* d) {
+  keyword_kind_t keyword_kind = comp_keyword_kind(
+      *t, 5, KW_VOID, KW_NUMBER, KW_STRING, KW_MATRIX, KW_LIST);
+  if (keyword_kind == KW_UNKNOWN) {
+    unexpected_token(*t, TOKEN_KEYWORD, d);
+    return VAR_UNKNOWN;
+  }
+
+  if (!void_allowed && keyword_kind == KW_VOID) {
+    diag_report_source(d, ERROR, &(*t)->location, "variables of type 'void' are not allowed");
+    return VAR_UNKNOWN;
+  }
+
+  TOK_ITER(t);
+
+  return keyword_to_variable_type(keyword_kind);
+}
+

@@ -23,6 +23,90 @@ ast_node_t* ast_node_create_reservation(variable_t variable,
   return node;
 }
 
+ast_node_t* ast_node_create_variable_decl(variable_type_t type,
+                                          const char* name,
+                                          bool has_variable,
+                                          variable_t variable,
+                                          ast_node_t* expr,
+                                          source_range_t location) {
+  ast_node_t* node = ast_node_create(AST_VARIABLE_DECL);
+  node->data.variable_decl.type = type;
+  node->data.variable_decl.name = name;
+  node->data.variable_decl.has_variable = has_variable;
+  node->data.variable_decl.variable = variable;
+  if (expr != NULL) {
+    arrput(node->children, expr);
+  }
+  node->location = location;
+
+  return node;
+}
+
+ast_node_t* ast_node_create_param(variable_type_t type,
+                                  const char* name,
+                                  source_range_t param_location) {
+  ast_node_t* node = ast_node_create(AST_PARAMETER);
+  node->data.variable_decl.type = type;
+  node->data.variable_decl.name = name;
+  node->location = param_location;
+  return node;
+}
+
+ast_node_t* ast_node_create_function_decl(variable_type_t return_type,
+                                          const char* name,
+                                          ast_node_t* parameters,
+                                          ast_node_t* body,
+                                          source_range_t location) {
+  ast_node_t* node = ast_node_create(AST_FUNCTION_DECL);
+  node->data.function_decl.return_type = return_type;
+  node->data.function_decl.name = name;
+  if (parameters != NULL) {
+    arrput(node->children, parameters);
+  }
+  if (body != NULL) {
+    arrput(node->children, body);
+  }
+  node->location = location;
+  return node;
+}
+
+ast_node_t* ast_node_create_unary_expr(ast_node_t* operand,
+                                       operator_kind_t op,
+                                       source_range_t location) {
+  assert(operand != NULL);
+
+  ast_node_t* node = ast_node_create(AST_UNARY_EXPRESSION);
+  arrput(node->children, operand);
+  node->data.operator= op;
+  node->location = location;
+  return node;
+}
+
+ast_node_t* ast_node_create_binary_expr(ast_node_t* left,
+                                        operator_kind_t op,
+                                        ast_node_t* right,
+                                        source_range_t location) {
+  assert(left != NULL);
+  assert(right != NULL);
+
+  ast_node_t* node = ast_node_create(AST_BINARY_EXPRESSION);
+  arrput(node->children, left);
+  arrput(node->children, right);
+  node->data.operator= op;
+  node->location = location;
+  return node;
+}
+
+ast_node_t* ast_node_create_function_call(const char* name,
+                                          ast_node_t** arguments,
+                                          source_range_t location) {
+  ast_node_t* node = ast_node_create(AST_FUNCTION_CALL);
+  node->data.function_call.name = name;
+  node->children = arguments;
+  node->location = location;
+  return node;
+}
+
 void ast_node_destroy(ast_node_t* node) {
   assert(node != NULL);
 
@@ -59,8 +143,11 @@ static void print_ast_node_internal(ast_node_t* node, FILE* stream, int depth) {
     case AST_ROOT:
       name = "Root";
       break;
-    case AST_FUNCTION:
-      name = "Function";
+    case AST_FUNCTION_DECL:
+      name = "Function Declaration";
+      break;
+    case AST_VARIABLE_DECL:
+      name = "Variable Declaration";
       break;
     case AST_STATEMENT:
       name = "Statement";
@@ -70,6 +157,42 @@ static void print_ast_node_internal(ast_node_t* node, FILE* stream, int depth) {
       break;
     case AST_VARIABLE_RESERVATION:
       name = "Variable Reservation";
+      break;
+    case AST_PARAMETER:
+      name = "Parameter";
+      break;
+    case AST_PARAMETER_LIST:
+      name = "Parameter List";
+      break;
+    case AST_BINARY_EXPRESSION:
+      name = "Binary Expression";
+      break;
+    case AST_UNARY_EXPRESSION:
+      name = "Unary Expression";
+      break;
+    case AST_IDENTIFIER:
+      name = "Identifier";
+      break;
+    case AST_NUMERIC_LITERAL:
+      name = "Numeric Literal";
+      break;
+    case AST_STRING_LITERAL:
+      name = "String Literal";
+      break;
+    case AST_FUNCTION_CALL:
+      name = "Function Call";
+      break;
+    case AST_IF_STATEMENT:
+      name = "If Statement";
+      break;
+    case AST_WHILE_STATEMENT:
+      name = "While Statement";
+      break;
+    /* case AST_FOR_STATEMENT: */
+    /*   name = "For Statement"; */
+    /*   break; */
+    case AST_RETURN_STATEMENT:
+      name = "Return Statement";
       break;
     default:
       assert(false);
@@ -83,7 +206,20 @@ static void print_ast_node_internal(ast_node_t* node, FILE* stream, int depth) {
   switch (node->kind) {
     case AST_ROOT:
       break;
-    case AST_FUNCTION:
+    case AST_FUNCTION_DECL:
+      break;
+    case AST_VARIABLE_DECL:
+      print_indent(stream, depth + 1);
+      fprintf(stream, "Type: %s\n",
+              variable_type_to_string(node->data.variable_decl.type));
+      print_indent(stream, depth + 1);
+      fprintf(stream, "Name: %.*s\n",
+              (int)arrlen(node->data.variable_decl.name),
+              node->data.variable_decl.name);
+      if (node->data.variable_decl.has_variable) {
+        print_indent(stream, depth + 1);
+        fprintf(stream, "Variable: %c\n", node->data.variable_decl.variable.id);
+      }
       break;
     case AST_STATEMENT:
       break;
@@ -95,6 +231,45 @@ static void print_ast_node_internal(ast_node_t* node, FILE* stream, int depth) {
               variable_type_to_string(node->data.reserved_variable.type));
       print_indent(stream, depth + 1);
       fprintf(stream, "Variable: %c\n", node->data.reserved_variable.id);
+      break;
+    case AST_PARAMETER:
+      print_indent(stream, depth + 1);
+      fprintf(stream, "Type: %s\n",
+              variable_type_to_string(node->data.variable_decl.type));
+      print_indent(stream, depth + 1);
+      fprintf(stream, "Name: %.*s\n",
+              (int)arrlen(node->data.variable_decl.name),
+              node->data.variable_decl.name);
+      break;
+    case AST_PARAMETER_LIST:
+      break;
+    case AST_BINARY_EXPRESSION:
+    case AST_UNARY_EXPRESSION:
+      print_indent(stream, depth + 1);
+      fprintf(stream, "Operator: %s\n", op_to_string(node->data.operator));
+      break;
+    case AST_IDENTIFIER:
+      print_indent(stream, depth + 1);
+      fprintf(stream, "Value: %.*s\n", (int)arrlen(node->data.identifier),
+              node->data.identifier);
+      break;
+    case AST_NUMERIC_LITERAL:
+      print_indent(stream, depth + 1);
+      fprintf(stream, "Value: %f\n", node->data.numeric_literal);
+      break;
+    case AST_STRING_LITERAL:
+      print_indent(stream, depth + 1);
+      fprintf(stream, "Value: %.*s\n", (int)arrlen(node->data.string_literal),
+              node->data.string_literal);
+      break;
+    case AST_FUNCTION_CALL:
+      print_indent(stream, depth + 1);
+      fprintf(stream, "Name: %s\n", node->data.function_call.name);
+      break;
+    case AST_IF_STATEMENT:
+    case AST_WHILE_STATEMENT:
+    /* case AST_FOR_STATEMENT: */
+    case AST_RETURN_STATEMENT:
       break;
     default:
       assert(false);

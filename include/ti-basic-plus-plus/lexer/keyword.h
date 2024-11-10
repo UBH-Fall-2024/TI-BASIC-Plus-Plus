@@ -17,8 +17,8 @@ typedef enum keyword_kind {
   KW_ELSE,
 
   KW_WHILE,
+  /* KW_FOR, */
   KW_RETURN,
-  KW_GOTO,
 
   KW_AND,
   KW_OR,
@@ -29,7 +29,6 @@ typedef enum keyword_kind {
 
 keyword_kind_t keyword_match(const char* string, size_t length);
 const char* keyword_to_string(keyword_kind_t kind);
-
 
 #endif  // KEYWORD_H
 

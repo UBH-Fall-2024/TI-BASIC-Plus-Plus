@@ -42,32 +42,44 @@ token_t* tokenize_punctuator(input_file_iterator_t* it, diagnostics_t* d) {
       break;
     case '+':
       kind = PUNCT_ADD;
-      if (next_c == '=') {
-        kind = PUNCT_ASGN_ADD;
-      }
+      /* if (next_c == '=') { */
+      /*   kind = PUNCT_ASGN_ADD; */
+      /* } */
       break;
     case '-':
       kind = PUNCT_SUB;
-      if (next_c == '=') {
-        kind = PUNCT_ASGN_SUB;
-      }
+      /* if (next_c == '=') { */
+      /*   kind = PUNCT_ASGN_SUB; */
+      /* } */
       break;
     case '*':
       kind = PUNCT_MUL;
-      if (next_c == '=') {
-        kind = PUNCT_ASGN_MUL;
-      }
+      /* if (next_c == '=') { */
+      /*   kind = PUNCT_ASGN_MUL; */
+      /* } */
       break;
     case '/':
       kind = PUNCT_DIV;
+      /* if (next_c == '=') { */
+      /*   kind = PUNCT_ASGN_DIV; */
+      /* } */
+      break;
+    /* case '%': */
+    /*   kind = PUNCT_MOD; */
+      /* if (next_c == '=') { */
+      /*   kind = PUNCT_ASGN_MOD; */
+      /* } */
+      /* break; */
+    case '<':
+      kind = PUNCT_CMP_LT;
       if (next_c == '=') {
-        kind = PUNCT_ASGN_DIV;
+        kind = PUNCT_CMP_LE;
       }
       break;
-    case '%':
-      kind = PUNCT_MOD;
+    case '>':
+      kind = PUNCT_CMP_GT;
       if (next_c == '=') {
-        kind = PUNCT_ASGN_MOD;
+        kind = PUNCT_CMP_GE;
       }
       break;
     case '=':
@@ -81,18 +93,6 @@ token_t* tokenize_punctuator(input_file_iterator_t* it, diagnostics_t* d) {
         kind = PUNCT_CMP_NE;
       }
       break;
-    case '<':
-      kind = PUNCT_CMP_LT;
-      if (next_c == '=') {
-        kind = PUNCT_CMP_LE;
-      }
-      break;
-    case '>':
-      kind = PUNCT_CMP_GT;
-      if (next_c == '=') {
-        kind = PUNCT_CMP_GE;
-      }
-      break;
     default:
       break;
   }
@@ -101,7 +101,7 @@ token_t* tokenize_punctuator(input_file_iterator_t* it, diagnostics_t* d) {
     return NULL;
   }
 
-  if (kind >= PUNCT_ASGN_ADD) {
+  if (kind > PUNCT_CMP_GT) {
     (void)if_next(it);
   }
 

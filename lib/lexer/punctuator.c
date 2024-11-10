@@ -33,32 +33,32 @@ const char* punct_to_string(punctuator_kind_t kind) {
       return "*";
     case PUNCT_DIV:
       return "/";
-    case PUNCT_MOD:
-      return "%";
+    /* case PUNCT_MOD: */
+    /*   return "%"; */
     case PUNCT_ASGN:
       return "=";
     case PUNCT_CMP_LT:
       return "<";
     case PUNCT_CMP_GT:
       return ">";
-    case PUNCT_ASGN_ADD:
-      return "+=";
-    case PUNCT_ASGN_SUB:
-      return "-=";
-    case PUNCT_ASGN_MUL:
-      return "*=";
-    case PUNCT_ASGN_DIV:
-      return "/=";
-    case PUNCT_ASGN_MOD:
-      return "%=";
-    case PUNCT_CMP_EQ:
-      return "==";
-    case PUNCT_CMP_NE:
-      return "!=";
+    /* case PUNCT_ASGN_ADD: */
+    /*   return "+="; */
+    /* case PUNCT_ASGN_SUB: */
+    /*   return "-="; */
+    /* case PUNCT_ASGN_MUL: */
+    /*   return "*="; */
+    /* case PUNCT_ASGN_DIV: */
+    /*   return "/="; */
+    /* case PUNCT_ASGN_MOD: */
+    /*   return "%="; */
     case PUNCT_CMP_LE:
       return "<=";
     case PUNCT_CMP_GE:
       return ">=";
+    case PUNCT_CMP_EQ:
+      return "==";
+    case PUNCT_CMP_NE:
+      return "!=";
     default:
       assert(false);
   }
