@@ -35,6 +35,7 @@ int main(int argc, const char** argv) {
     if (driver_config.send) {
       const char** args = NULL;
       arrput(args, "tilp");
+      arrput(args, "-n");
       arrput(args, driver_config.output_path);
 
       subprocess_t s;

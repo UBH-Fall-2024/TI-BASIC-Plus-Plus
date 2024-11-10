@@ -150,6 +150,28 @@ static void analyze_block(ast_node_t* node,
       if (should_exit(d)) {
         goto CLEANUP;
       }
+    } else if (decl->kind == AST_IF_STATEMENT ||
+               decl->kind == AST_WHILE_STATEMENT ||
+               decl->kind == AST_RETURN_STATEMENT) {
+      for (size_t j = 0; j < arrlenu(decl->children); j++) {
+        ast_node_t* child = decl->children[j];
+
+        if (child->kind == AST_BINARY_EXPRESSION ||
+            child->kind == AST_UNARY_EXPRESSION ||
+            child->kind == AST_IDENTIFIER ||
+            child->kind == AST_FUNCTION_CALL) {
+          analyze_expr(child, local_variable_decls, function_decls, d);
+          if (should_exit(d)) {
+            goto CLEANUP;
+          }
+        } else if (child->kind == AST_BLOCK) {
+          analyze_block(child, reserved, assigned, local_variable_decls,
+                        function_decls, d);
+          if (should_exit(d)) {
+            goto CLEANUP;
+          }
+        }
+      }
     }
   }
 

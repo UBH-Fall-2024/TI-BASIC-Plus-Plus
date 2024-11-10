@@ -360,19 +360,24 @@ void dump_ascii_ti_basic(ast_node_t* node, FILE* stream) {
         if (node->children[0]->data.variable_decl.has_variable) {
           switch (node->children[0]->data.variable_decl.variable.type) {
             case VAR_NUMBER:
-              fprintf(stream, "%c", node->children[0]->data.variable_decl.variable.id);
+              fprintf(stream, "%c",
+                      node->children[0]->data.variable_decl.variable.id);
               break;
             case VAR_STRING:
-              fprintf(stream, "Str%c", node->children[0]->data.variable_decl.variable.id);
+              fprintf(stream, "Str%c",
+                      node->children[0]->data.variable_decl.variable.id);
               break;
             case VAR_MATRIX:
-              fprintf(stream, "[%c]", node->children[0]->data.variable_decl.variable.id);
+              fprintf(stream, "[%c]",
+                      node->children[0]->data.variable_decl.variable.id);
               break;
             case VAR_LIST:
-              fprintf(stream, "L%c", node->children[0]->data.variable_decl.variable.id);
+              fprintf(stream, "L%c",
+                      node->children[0]->data.variable_decl.variable.id);
               break;
             case VAR_LIST_ELEMENT:
-              fprintf(stream, "L₀(%d)", node->children[0]->data.variable_decl.variable.id);
+              fprintf(stream, "L₀(%d)",
+                      node->children[0]->data.variable_decl.variable.id);
               break;
             default:
               break;
@@ -380,6 +385,40 @@ void dump_ascii_ti_basic(ast_node_t* node, FILE* stream) {
         }
       }
       break;
+    case AST_IF_STATEMENT:
+      fprintf(stream, "If ");
+      dump_ascii_ti_basic(node->children[0], stream);
+      fprintf(stream, "\nThen\n");
+      dump_ascii_ti_basic(node->children[1], stream);
+
+      {
+        size_t i = 2;
+        while (i < arrlenu(node->children)) {
+          ast_node_kind_t kind = node->children[i]->kind;
+          if (kind != AST_BLOCK) {
+            fprintf(stream, "Else\n");
+            fprintf(stream, "If ");
+            dump_ascii_ti_basic(node->children[i++], stream);
+            fprintf(stream, "\nThen\n");
+            dump_ascii_ti_basic(node->children[i++], stream);
+          } else {
+            fprintf(stream, "Else\n");
+            dump_ascii_ti_basic(node->children[i], stream);
+            break;
+          }
+        }
+
+        for (size_t j = 1; j < i-1; j++) {
+          fprintf(stream, "End\n");
+        }
+      }
+      break;
+    case AST_WHILE_STATEMENT:
+      fprintf(stream, "While ");
+      dump_ascii_ti_basic(node->children[0], stream);
+      fprintf(stream, "\n");
+      dump_ascii_ti_basic(node->children[1], stream);
+      fprintf(stream, "End\n");
     default:
       break;
   }
