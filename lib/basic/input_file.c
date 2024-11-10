@@ -24,7 +24,7 @@ bool if_init(input_file_t* f, const char* path) {
   }
 
   f->size = (size_t)file_size;
-  f->contents = (int*)malloc(file_size + 1);
+  f->contents = (int*)malloc((file_size + 1) * sizeof(int));
 
   {
     f->line_data = NULL;
