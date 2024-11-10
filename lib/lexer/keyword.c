@@ -4,10 +4,11 @@
 #include <string.h>
 
 static const char* keyword_strings[] = {
-    [KW_UNKNOWN] = NULL,    [KW_NUMBER] = "Number", [KW_STRING] = "String",
-    [KW_MATRIX] = "Matrix", [KW_LIST] = "List",     [KW_IF] = "if",
-    [KW_ELIF] = "elif",     [KW_ELSE] = "else",     [KW_WHILE] = "while",
-    [KW_RETURN] = "return", [KW_GOTO] = "goto",
+    [KW_UNKNOWN] = NULL,      [KW_VOID] = "void",     [KW_NUMBER] = "Number",
+    [KW_STRING] = "String",   [KW_MATRIX] = "Matrix", [KW_LIST] = "List",
+    [KW_IF] = "if",           [KW_ELIF] = "elif",     [KW_ELSE] = "else",
+    [KW_WHILE] = "while",     [KW_RETURN] = "return", [KW_GOTO] = "goto",
+    [KW_RESERVE] = "reserve",
 };
 
 static const size_t keyword_string_count =

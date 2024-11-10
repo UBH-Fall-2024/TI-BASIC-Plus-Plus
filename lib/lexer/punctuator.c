@@ -7,51 +7,57 @@ const char* punct_to_string(punctuator_kind_t kind) {
   switch (kind) {
     case PUNCT_UNKNOWN:
       return "unknown";
-    case PUNCT_LPAREN:    // (
+    case PUNCT_LPAREN:
       return "(";
-    case PUNCT_RPAREN:    // )
+    case PUNCT_RPAREN:
       return ")";
-    case PUNCT_LBRACE:    // {
+    case PUNCT_LBRACE:
       return "{";
-    case PUNCT_RBRACE:    // }
+    case PUNCT_RBRACE:
       return "}";
-    case PUNCT_LBRACKET:  // [
+    case PUNCT_LBRACKET:
       return "[";
-    case PUNCT_RBRACKET:  // ]
+    case PUNCT_RBRACKET:
       return "]";
-    case PUNCT_ADD:       // +
+    case PUNCT_COLON:
+      return ":";
+    case PUNCT_DOT:
+      return ".";
+    case PUNCT_COMMA:
+      return ",";
+    case PUNCT_ADD:
       return "+";
-    case PUNCT_SUB:       // -
+    case PUNCT_SUB:
       return "-";
-    case PUNCT_MUL:       // *
+    case PUNCT_MUL:
       return "*";
-    case PUNCT_DIV:       // /
+    case PUNCT_DIV:
       return "/";
-    case PUNCT_MOD:       // %
+    case PUNCT_MOD:
       return "%";
-    case PUNCT_ASGN:      // =
+    case PUNCT_ASGN:
       return "=";
-    case PUNCT_CMP_LT:    // <
+    case PUNCT_CMP_LT:
       return "<";
-    case PUNCT_CMP_GT:    // >
+    case PUNCT_CMP_GT:
       return ">";
-    case PUNCT_ASGN_ADD:  // +=
+    case PUNCT_ASGN_ADD:
       return "+=";
-    case PUNCT_ASGN_SUB:  // -=
+    case PUNCT_ASGN_SUB:
       return "-=";
-    case PUNCT_ASGN_MUL:  // *=
+    case PUNCT_ASGN_MUL:
       return "*=";
-    case PUNCT_ASGN_DIV:  // /=
+    case PUNCT_ASGN_DIV:
       return "/=";
-    case PUNCT_ASGN_MOD:  // %=
+    case PUNCT_ASGN_MOD:
       return "%=";
-    case PUNCT_CMP_EQ:    // ==
+    case PUNCT_CMP_EQ:
       return "==";
-    case PUNCT_CMP_NE:    // !=
+    case PUNCT_CMP_NE:
       return "!=";
-    case PUNCT_CMP_LE:    // <=
+    case PUNCT_CMP_LE:
       return "<=";
-    case PUNCT_CMP_GE:    // >=
+    case PUNCT_CMP_GE:
       return ">=";
     default:
       assert(false);
@@ -59,3 +65,4 @@ const char* punct_to_string(punctuator_kind_t kind) {
 
   return NULL;
 }
+

@@ -6,6 +6,7 @@
 typedef enum keyword_kind {
   KW_UNKNOWN = 0,
 
+  KW_VOID,
   KW_NUMBER,
   KW_STRING,
   KW_MATRIX,
@@ -18,9 +19,13 @@ typedef enum keyword_kind {
   KW_WHILE,
   KW_RETURN,
   KW_GOTO,
+
+  KW_RESERVE,
 } keyword_kind_t;
 
 keyword_kind_t keyword_match(const char* string, size_t length);
 const char* keyword_to_string(keyword_kind_t kind);
 
-#endif // KEYWORD_H
+
+#endif  // KEYWORD_H
+

@@ -11,6 +11,9 @@ typedef enum punctuator_kind {
   PUNCT_RBRACE,    // }
   PUNCT_LBRACKET,  // [
   PUNCT_RBRACKET,  // ]
+  PUNCT_COLON,     // :
+  PUNCT_DOT,       // .
+  PUNCT_COMMA,     // ,
   PUNCT_ADD,       // +
   PUNCT_SUB,       // -
   PUNCT_MUL,       // *

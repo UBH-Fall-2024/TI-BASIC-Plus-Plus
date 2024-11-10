@@ -31,6 +31,15 @@ token_t* tokenize_punctuator(input_file_iterator_t* it, diagnostics_t* d) {
     case ']':
       kind = PUNCT_RBRACKET;
       break;
+    case ':':
+      kind = PUNCT_COLON;
+      break;
+    case '.':
+      kind = PUNCT_DOT;
+      break;
+    case ',':
+      kind = PUNCT_COMMA;
+      break;
     case '+':
       kind = PUNCT_ADD;
       if (next_c == '=') {
