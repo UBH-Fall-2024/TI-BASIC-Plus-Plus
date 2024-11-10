@@ -13,5 +13,9 @@ token_kind_t comp_token_kind(const token_t* t, size_t n, ...);
 punctuator_kind_t comp_punctuator_kind(const token_t* t, size_t n, ...);
 keyword_kind_t comp_keyword_kind(const token_t* t, size_t n, ...);
 
+void unexpected_token(token_t* t, token_kind_t kind, diagnostics_t* d);
+
+#define TOK_ITER(t) (*(t) = (*(t))->next)
+
 #endif  // PARSER_H
 

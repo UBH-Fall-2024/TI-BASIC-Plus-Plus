@@ -68,8 +68,17 @@ void print_range(source_range_t* range, size_t indent_num, FILE* stream) {
   assert(range != NULL);
   assert(stream != NULL);
 
-  (void)fprintf(stream, "%*sLocation: %s:%zu:%zu-%zu:%zu\n", (int)indent_num,
-                "\t", range->file->path, range->begin.line, range->begin.column,
-                range->end.line, range->end.column);
+  if (!range_is_valid(range)) {
+    (void)fprintf(stream, "Invalid range\n");
+    return;
+  }
+
+  for (size_t i = 0; i < indent_num; ++i) {
+    (void)fputc('\t', stream);
+  }
+
+  (void)fprintf(stream, "Location: %s:%zu:%zu-%zu:%zu\n", range->file->path,
+                range->begin.line, range->begin.column, range->end.line,
+                range->end.column);
 }
 

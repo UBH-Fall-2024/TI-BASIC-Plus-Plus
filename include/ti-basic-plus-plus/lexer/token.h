@@ -16,6 +16,8 @@ typedef enum {
   TOKEN_EOF,
 } token_kind_t;
 
+const char* token_kind_to_string(token_kind_t kind);
+
 typedef struct token {
   struct token* next;
   struct token* prev;

@@ -3,11 +3,26 @@
 #include <assert.h>
 #include <stdarg.h>
 
+ast_node_t* parse_global_decl(token_t** head_token, diagnostics_t* d);
+
 ast_node_t* parse_tokens(token_t* head_token, diagnostics_t* d) {
   assert(head_token != NULL);
   assert(d != NULL);
 
-  return NULL;
+  ast_node_t* root = ast_node_create(AST_ROOT);
+
+  while (head_token != NULL && head_token->kind != TOKEN_EOF && !should_exit(d)) {
+    ast_node_t* decl = parse_global_decl(&head_token, d);
+    if (decl == NULL) {
+      return root;
+    }
+
+    arrput(root->children, decl);
+  }
+
+  // Should be EOF...
+
+  return root;
 }
 
 token_kind_t comp_token_kind(const token_t* t, size_t n, ...) {
@@ -85,3 +100,20 @@ keyword_kind_t comp_keyword_kind(const token_t* t, size_t n, ...) {
   return matched_kind;
 }
 
+void unexpected_token(token_t* t, token_kind_t kind, diagnostics_t* d) {
+  assert(t != NULL);
+  assert(d != NULL);
+
+  if (t->kind != kind || kind == TOKEN_UNKNOWN) {
+    diag_report_source(d, ERROR, &t->location, "unexpected %s", token_kind_to_string(t->kind));
+  }
+  else if (t->kind == TOKEN_PUNCTUATOR) {
+    diag_report_source(d, ERROR, &t->location, "unexpected punctuator '%s'", punct_to_string(t->data.punctuator));
+  }
+  else if (t->kind == TOKEN_KEYWORD) {
+    diag_report_source(d, ERROR, &t->location, "unexpected keyword '%s'", keyword_to_string(t->data.keyword));
+  }
+  else {
+    diag_report_source(d, ERROR, &t->location, "unexpected token");
+  }
+}

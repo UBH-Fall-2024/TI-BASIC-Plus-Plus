@@ -42,7 +42,8 @@ static void compile(void) {
   input_file_t input_file;
 
   if (!if_init(&input_file, driver_config.input_path)) {
-    diag_report_file(&d, ERROR, driver_config.input_path, "failed to open file");
+    diag_report_file(&d, ERROR, driver_config.input_path,
+                     "failed to open file");
     return;
   }
 
@@ -79,7 +80,12 @@ static void compile(void) {
   // (Optional) Encoding
 
 CLEANUP:
-  token_list_destroy(head_token);
+  if (ast_root != NULL) {
+    ast_node_destroy(ast_root);
+  }
+  if (head_token != NULL) {
+    token_list_destroy(head_token);
+  }
   if_destroy(&input_file);
 }
 
