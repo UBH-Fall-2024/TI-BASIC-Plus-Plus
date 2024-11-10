@@ -282,31 +282,31 @@ static void print_ast_node_internal(ast_node_t* node, FILE* stream, int depth) {
   }
 }
 
-void output_ti_basic(ast_node_t* node, FILE* stream) {
+void dump_ascii_ti_basic(ast_node_t* node, FILE* stream) {
   assert(node != NULL);
   assert(stream != NULL);
 
   switch (node->kind) {
     case AST_ROOT:
       for (size_t i = 0; i < arrlenu(node->children); i++) {
-        output_ti_basic(node->children[i], stream);
+        dump_ascii_ti_basic(node->children[i], stream);
       }
       break;
     case AST_FUNCTION_DECL:
       // if main
       if (strncmp(node->data.function_decl.name, "main",
                   arrlenu(node->data.function_decl.name)) == 0) {
-        output_ti_basic(node->children[0], stream);
+        dump_ascii_ti_basic(node->children[0], stream);
       }
       break;
     case AST_BLOCK:
       for (size_t i = 0; i < arrlenu(node->children); i++) {
-        output_ti_basic(node->children[i], stream);
+        dump_ascii_ti_basic(node->children[i], stream);
       }
       break;
     case AST_VARIABLE_DECL:
       if (arrlenu(node->children) > 0) {
-        output_ti_basic(node->children[0], stream);
+        dump_ascii_ti_basic(node->children[0], stream);
       }
       fprintf(stream, "→");
 
@@ -351,7 +351,7 @@ void output_ti_basic(ast_node_t* node, FILE* stream) {
       }
 
       for (size_t i = 0; i < arrlenu(node->children); i++) {
-        output_ti_basic(node->children[i], stream);
+        dump_ascii_ti_basic(node->children[i], stream);
       }
       fprintf(stream, "\n");
       break;

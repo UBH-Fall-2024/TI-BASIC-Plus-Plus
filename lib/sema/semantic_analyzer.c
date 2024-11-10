@@ -2,8 +2,8 @@
 
 #include <assert.h>
 #include <stb_ds.h>
-#include <ti-basic-plus-plus/calculator/variable.h>
 #include <ti-basic-plus-plus/calculator/builtin_functions.h>
+#include <ti-basic-plus-plus/calculator/variable.h>
 
 // This code isn't the nicest, it was one last things I wrote!
 
@@ -47,46 +47,51 @@ static void analyze_expr(ast_node_t* expr,
       for (size_t i = 0; i < arrlenu(variable_decls); i++) {
         ast_node_t* decl = variable_decls[i];
 
-        if (arrlenu(decl->data.variable_decl.name) == arrlenu(expr->data.identifier) &&
+        if (arrlenu(decl->data.variable_decl.name) ==
+                arrlenu(expr->data.identifier) &&
             strncmp(decl->data.variable_decl.name, expr->data.identifier,
                     arrlenu(expr->data.identifier)) == 0) {
-
           arrput(expr->children, decl);
           expr->dont_free_children = true;
           goto VAR_FOUND;
         }
       }
 
-      diag_report_source(d, ERROR, &expr->location, "reference to undeclared variable");
+      diag_report_source(d, ERROR, &expr->location,
+                         "reference to undeclared variable");
       return;
 
-VAR_FOUND:
-        break;
+    VAR_FOUND:
+      break;
     case AST_FUNCTION_CALL:
       for (size_t i = 0; i < arrlenu(function_decls); i++) {
         ast_node_t* decl = function_decls[i];
 
-        if (arrlenu(decl->data.function_decl.name) == arrlenu(expr->data.function_call.name) &&
-            strncmp(decl->data.function_decl.name, expr->data.function_call.name,
+        if (arrlenu(decl->data.function_decl.name) ==
+                arrlenu(expr->data.function_call.name) &&
+            strncmp(decl->data.function_decl.name,
+                    expr->data.function_call.name,
                     arrlenu(expr->data.function_call.name)) == 0) {
           expr->data.function_call.matched_function.decl = (ast_node_t*)decl;
-        expr->data.function_call.is_builtin = false;
+          expr->data.function_call.is_builtin = false;
           goto FUNC_FOUND;
         }
       }
 
-
-      builtin_function_t func = match_builtin_function(expr->data.function_call.name, arrlenu(expr->data.function_call.name));
+      builtin_function_t func =
+          match_builtin_function(expr->data.function_call.name,
+                                 arrlenu(expr->data.function_call.name));
       if (func != FUNC_UNKNOWN) {
         expr->data.function_call.matched_function.builtin = func;
         expr->data.function_call.is_builtin = true;
         goto FUNC_FOUND;
       }
 
-      diag_report_source(d, ERROR, &expr->location, "reference to undeclared function");
+      diag_report_source(d, ERROR, &expr->location,
+                         "reference to undeclared function");
       return;
 
-FUNC_FOUND:
+    FUNC_FOUND:
       for (size_t i = 0; i < arrlenu(expr->children); i++) {
         analyze_expr(expr->children[i], variable_decls, function_decls, d);
         if (should_exit(d)) {
@@ -255,7 +260,7 @@ void analyze_semantics(ast_node_t* node, diagnostics_t* d) {
     }
 
     /* print_local_variables(local_variable_decls); */
-    analyze_block(body, reserved_variables, &assigned_variables, 
+    analyze_block(body, reserved_variables, &assigned_variables,
                   local_variable_decls, function_decls, d);
 
     arrfree(local_variable_decls);

@@ -113,7 +113,7 @@ ast_node_t* ast_node_create_function_call(const char* name,
 
 void print_ast(ast_node_t* root, FILE* stream);
 
-void output_ti_basic(ast_node_t* root, FILE* stream);
+void dump_ascii_ti_basic(ast_node_t* root, FILE* stream);
 
 #endif  // AST_H
 

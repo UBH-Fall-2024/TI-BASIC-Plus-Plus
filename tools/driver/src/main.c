@@ -3,6 +3,7 @@
 #include <driver/options.h>
 #include <ti-basic-plus-plus/basic/diagnostics.h>
 #include <ti-basic-plus-plus/basic/input_file.h>
+#include <ti-basic-plus-plus/basic/subprocess.h>
 #include <ti-basic-plus-plus/lexer/lexer.h>
 #include <ti-basic-plus-plus/parser/parser.h>
 #include <ti-basic-plus-plus/sema/semantic_analyzer.h>
@@ -32,7 +33,24 @@ int main(int argc, const char** argv) {
     }
 
     if (driver_config.send) {
-      // TODO: Send to calculator.
+      const char** args = NULL;
+      arrput(args, "tilp");
+      arrput(args, driver_config.output_path);
+
+      subprocess_t s;
+
+      if (!begin_subprocess(args, &s)) {
+        diag_report(&d, ERROR, "failed to start subprocess");
+        arrfree(args);
+        break;
+      }
+
+      arrfree(args);
+
+      if (!end_subprocess(&s, true)) {
+        diag_report(&d, ERROR, "subprocess failed");
+        break;
+      }
     }
   } while (false);
 
@@ -82,13 +100,40 @@ static void compile(void) {
     print_ast(ast_root, stdout);
   }
 
-  // This is temporary.
-  FILE* output_file = fopen("output.tibasic", "w");
-  if (!output_file) {
+  const char* ascii_filename = driver_config.output_path;
+  if (driver_config.output_type == OUTPUT_8XP) {
+    ascii_filename = "tmp.tibasic";
+  }
+
+  FILE* ascii_output = fopen(ascii_filename, "w");
+  if (!ascii_output) {
     goto CLEANUP;
   }
-  output_ti_basic(ast_root, output_file);
-  fclose(output_file);
+
+  dump_ascii_ti_basic(ast_root, ascii_output);
+  fclose(ascii_output);
+
+  if (driver_config.output_type == OUTPUT_8XP) {
+    const char** args = NULL;
+    arrput(args, "8xp-encode");
+    arrput(args, ascii_filename);
+    arrput(args, driver_config.output_path);
+
+    subprocess_t s;
+
+    if (!begin_subprocess(args, &s)) {
+      diag_report(&d, ERROR, "failed to start subprocess");
+      arrfree(args);
+      goto CLEANUP;
+    }
+
+    arrfree(args);
+
+    if (!end_subprocess(&s, true)) {
+      diag_report(&d, ERROR, "subprocess failed");
+      goto CLEANUP;
+    }
+  }
 
 CLEANUP:
   if (ast_root != NULL) {
