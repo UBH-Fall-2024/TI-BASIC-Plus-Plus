@@ -142,7 +142,7 @@ static void print_token_punctuator(token_t* token, FILE* stream) {
   fputs("Token: Punctuator\n", stream);
   print_range(&token->location, 1, stream);
 
-  /* fprintf(stream, "\tValue: '%s'\n", ...); */
+  fprintf(stream, "\tValue: '%s'\n", punct_to_string(token->data.punctuator));
 }
 
 static void print_token_number_literal(token_t* token, FILE* stream) {

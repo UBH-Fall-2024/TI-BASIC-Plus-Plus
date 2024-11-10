@@ -85,7 +85,14 @@ token_t* next_token(input_file_iterator_t* it, diagnostics_t* d) {
       return tokenize_identifier(it, d);
     }
 
-    // TODO: Punctuators
+    token = tokenize_punctuator(it, d);
+    if (token != NULL) {
+      return token;
+    }
+
+    source_range_t range = range_at(it->file, if_get_position(it));
+    diag_report_source(d, ERROR, &range, "invalid token '%c' (0x%02x)", c, c);
+    return NULL;
   }
 
   return token_create(TOKEN_EOF, range_at_current(it));

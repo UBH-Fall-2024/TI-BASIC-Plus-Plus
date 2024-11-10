@@ -2,7 +2,7 @@
 #define TOKEN_H
 
 #include <ti-basic-plus-plus/basic/source_location.h>
-#include <ti-basic-plus-plus/basic/stringref.h>
+#include <ti-basic-plus-plus/lexer/punctuator.h>
 
 typedef enum {
   TOKEN_UNKNOWN = 0,
@@ -27,7 +27,7 @@ typedef struct token {
     char* string; // stb_ds allocated
     double number;
     /* keyword_t keyword; */
-    /* punctuator_t punctuator; */
+    punctuator_kind_t punctuator;
   } data;
 } token_t;
 
